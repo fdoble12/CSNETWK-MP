@@ -27,10 +27,14 @@ class Server:
 
     def respond(self, payload, client_address):
         response = {"message":""}
-        if payload['command'] == "join":
-            response['message'] = "Connection to Message Board Server is successful!"
-            self.socket.sendto(json.dumps(response).encode('ascii'), client_address)    # TODO: Send response to client as JSON
-
+        command = payload['command']
+        if command == "join":
+            response['message'] = "Connection to Mssage Board Server is successful!"
+            self.socket.sendto(json.dumps(response).encode('ascii'), client_address)
+        elif command == "leave":
+            response['message'] = "Connection closed. Thank you!"
+            self.socket.sendto(json.dumps(response).encode('ascii'), client_address)
+            
 if __name__ == "__main__":
     HOST    = socket.gethostname()
     PORT    = 8080

@@ -66,8 +66,9 @@ if __name__ == "__main__":
             # Disconnect to the server application
             try:
                 client.send({"command": "leave"})
+                response = json.loads(client.server_message())
+                print(response['message'])
                 client.disconnect()
-                print('Connection closed. Thank you!')
             except:
                 print("Error: Disconnection failed. Please connect to the server first.")
 
