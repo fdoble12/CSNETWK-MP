@@ -26,9 +26,10 @@ class Server:
             self.listen()
 
     def respond(self, payload, client_address):
+        response = {"message":""}
         if payload['command'] == "join":
-            message = "Connection to Message Board Server is successful!"
-            self.socket.sendto(message.encode(), client_address)    # TODO: Send response to client as JSON
+            response['message'] = "Connection to Message Board Server is successful!"
+            self.socket.sendto(json.dumps(response).encode('ascii'), client_address)    # TODO: Send response to client as JSON
 
 if __name__ == "__main__":
     HOST    = socket.gethostname()

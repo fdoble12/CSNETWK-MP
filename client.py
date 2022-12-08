@@ -5,7 +5,7 @@ class Client:
         self.handle = None
         self.socket = None
         self.server_address_port = None
-
+    
     def send(self, message):
         # Send message to server
         client_message = json.dumps(message)   # convert message to JSON
@@ -13,6 +13,9 @@ class Client:
 
         #server_message, *_ = self.socket.recvfrom(1024)
         #return server_message.decode()
+
+    def server_message(self):
+        return self.socket.recv(1024).decode('ascii')
 
     def connect(self, socket_address):
         # Connect to server
@@ -50,7 +53,8 @@ if __name__ == "__main__":
                 try:
                     client.connect( (server_ip_add, int(port)) )
                     client.send({"command": "join"})
-                    print("Connection to the Message Board Server is successful!")
+                    response = json.loads(client.server_message())
+                    print(response['message']) #response from server
                 except Exception as e:
                     print(e)
                     print("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
