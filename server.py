@@ -1,5 +1,7 @@
 #server
 import socket
+import json
+
 
 def start_server():
     HOST = socket.gethostbyname(socket.gethostname())
@@ -19,7 +21,12 @@ def start_server():
         client_socket, addr = server_socket.accept()
 
         print("Got a connection from %s" % str(addr))
-        message = client_socket.recv(1024).decode('ascii')
-
+        client_command = json.loads(client_socket.recv(1024).decode('ascii'))
+        print("Client Command: "+client_command['command'])
+        
+        if client_command['command'] == "join":
+            client_socket.send("Connection to Message Board Server is succesful!".encode('ascii'))
+        
+        
 if __name__ == "__main__":
     start_server()
