@@ -1,3 +1,4 @@
+import socket
 def parse_input(input_string):
     command, *params = input_string.split()
 
@@ -6,6 +7,15 @@ def parse_input(input_string):
         # Syntax: /join <server_ip_add> <port>
         try:
             server_ip_add, port = params
+            
+            # socket object
+            print ("Connecting to Host: "+server_ip_add+" in Port: "+ port+"...")
+            try:
+                client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                client_socket.connect((server_ip_add, int(port)))    
+            except:
+                print("Can't connect to server...")
+                
         except:
             print("Error: Command parameters do not match or is not allowed.")
 
