@@ -38,93 +38,99 @@ if __name__ == "__main__":
     print("***** Welcome to  Message Board System *****")
     print("\ntype \"/?\" for the commands")
 
-    while True:
-        
-        user_input = input('\n>> ')
-        command, *params = user_input.split()
-        
+    try:
+        while True:
+            
+            user_input = input('\n>> ')
+            command, *params = user_input.split()
+            
 
-        if command == '/join':
-            # Connect to the server application
-            # Syntax: /join <server_ip_add> <port>
-            try:
-                server_ip_add, port = params
-                
+            if command == '/join':
+                # Connect to the server application
+                # Syntax: /join <server_ip_add> <port>
                 try:
-                    client.connect( (server_ip_add, int(port)) )
-                    client.send({"command": "join"})
+                    server_ip_add, port = params
+                    
+                    try:
+                        client.connect( (server_ip_add, int(port)) )
+                        client.send({"command": "join"})
+                        response = json.loads(client.server_message())
+                        print(response['message']) #response from server
+                    except Exception as e:
+                        print(e)
+                        print("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
+                except:
+                    print("Error: Command parameters do not match or is not allowed.")
+
+
+            elif command == '/leave':
+                # Disconnect to the server application
+                try:
+                    client.send({"command": "leave"})
                     response = json.loads(client.server_message())
-                    print(response['message']) #response from server
-                except Exception as e:
-                    print(e)
-                    print("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
-            except:
-                print("Error: Command parameters do not match or is not allowed.")
-
-
-        elif command == '/leave':
-            # Disconnect to the server application
-            try:
-                client.send({"command": "leave"})
-                response = json.loads(client.server_message())
-                print(response['message'])
-                client.disconnect()
-            except:
-                print("Error: Disconnection failed. Please connect to the server first.")
-
-
-        elif command == '/register':
-            # Register a unique handle or alias
-            # Syntax: /register <handle>
-            try:
-                [handle] = params
-
-                try:
-                    client.send({"command": "register", "handle": handle})
-                    print ("Welcome, " + handle + "!")
+                    print(response['message'])
+                    client.disconnect()
                 except:
-                    print("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
-            except:
-                print("Error: Command parameters do not match or is not allowed.")
+                    print("Error: Disconnection failed. Please connect to the server first.")
 
 
-        elif command == '/all':
-            # Send message to all
-            # Syntax: /all <message>
-            message = ' '.join(params)
+            elif command == '/register':
+                # Register a unique handle or alias
+                # Syntax: /register <handle>
+                try:
+                    [handle] = params
 
-            try:
-                client.send({"command": "all", "message": message})
-                print("Sent to all: " + message)
-            except:
-                print("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
+                    try:
+                        client.send({"command": "register", "handle": handle})
+                        print ("Welcome, " + handle + "!")
+                    except:
+                        print("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
+                except:
+                    print("Error: Command parameters do not match or is not allowed.")
 
 
-        elif command == '/msg':
-            # Send direct message to a single handle
-            # Syntax: /msg <handle> <message>
-            try:
-                handle = params[0]
-                message = ' '.join(params[1:])
+            elif command == '/all':
+                # Send message to all
+                # Syntax: /all <message>
+                message = ' '.join(params)
 
                 try:
-                    client.send({"command": "msg", "handle": handle, "message": message})
-                    print("[To " + handle + "]: " + message)
+                    client.send({"command": "all", "message": message})
+                    print("Sent to all: " + message)
                 except:
                     print("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
 
-            except:
-                print("Error: Command parameters do not match or is not allowed.")
+
+            elif command == '/msg':
+                # Send direct message to a single handle
+                # Syntax: /msg <handle> <message>
+                try:
+                    handle = params[0]
+                    message = ' '.join(params[1:])
+
+                    try:
+                        client.send({"command": "msg", "handle": handle, "message": message})
+                        print("[To " + handle + "]: " + message)
+                    except:
+                        print("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
+
+                except:
+                    print("Error: Command parameters do not match or is not allowed.")
 
 
-        elif command == '/?':
-            # Request command help to output all Input, Syntax commands for references
-            print("\n*************************** Commands for references ***************************")
-            print("/join <server_ip_add> <port>" + "\t\t" +       "Connect to the server application ")
-            print("/leave"                       + "\t\t\t\t\t" + "Disconnect to the server application")
-            print("/register <handle>"           + "\t\t\t" +     "Register a unique handle or alias")
-            print("/all <message>"               + "\t\t\t\t" +   "Send message to all")
-            print("/msg <handle> <message>"      + "\t\t\t" +     "Send direct message to a single handle\n\n")
+            elif command == '/?':
+                # Request command help to output all Input, Syntax commands for references
+                print("\n*************************** Commands for references ***************************")
+                print("/join <server_ip_add> <port>" + "\t\t" +       "Connect to the server application ")
+                print("/leave"                       + "\t\t\t\t\t" + "Disconnect to the server application")
+                print("/register <handle>"           + "\t\t\t" +     "Register a unique handle or alias")
+                print("/all <message>"               + "\t\t\t\t" +   "Send message to all")
+                print("/msg <handle> <message>"      + "\t\t\t" +     "Send direct message to a single handle\n\n")
 
-        else:
-            print("Error: Command not found.")
+            else:
+                print("Error: Command not found.")
+    
+    except KeyboardInterrupt:
+        # Disconnect client before exiting program
+        if client.socket != None:
+            client.disconnect()
