@@ -71,6 +71,7 @@ if __name__ == "__main__":
 
                 try:
                     client.send({"command": "register", "handle": handle})
+                    print ("Welcome, " + handle + "!")
                 except:
                     print("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
             except:
@@ -84,6 +85,7 @@ if __name__ == "__main__":
 
             try:
                 client.send({"command": "all", "message": message})
+                print("Sent to all: " + message)
             except:
                 print("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
 
@@ -97,6 +99,7 @@ if __name__ == "__main__":
 
                 try:
                     client.send({"command": "msg", "handle": handle, "message": message})
+                    print("[To" + handle + "]: " + message)
                 except:
                     print("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
 
@@ -106,8 +109,12 @@ if __name__ == "__main__":
 
         elif command == '/?':
             # Request command help to output all Input, Syntax commands for references
-            pass    # TODO
-
+            print("*************************** Commands for references ***************************")
+            print("/join <server_ip_add> <port>" + "\t\t" +       "Connect to the server application ")
+            print("/leave"                       + "\t\t\t\t\t" + "Disconnect to the server application")
+            print("/register <handle>"           + "\t\t\t" +     "Register a unique handle or alias")
+            print("/all <message>"               + "\t\t\t\t" +   "Send message to all")
+            print("/msg <handle> <message>"      + "\t\t\t" +     "Send direct message to a single handle")
 
         else:
             print("Error: Command not found.")
