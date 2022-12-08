@@ -57,45 +57,42 @@ if __name__ == "__main__":
             # Disconnect to the server application
             try:
                 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                client_socket.connect((server_ip_add, int(port)))    
+                client_socket.connect((server_ip_add, int(port)))         
             except:
-                print("Can't connect to server...")
-                
-        except:
-            print("Error: Command parameters do not match or is not allowed.")
+                print("Error: Disconnection failed. Please connect to the server first.")
 
-    elif command == 'leave':
-        # Disconnect to the server application
-        pass
+        elif command == 'leave':
+            # Disconnect to the server application
+            pass
 
-    elif command == '/register':
-        # Register a unique handle or alias
-        # Syntax: /register <handle>
-        try:
-            [handle] = params
-        except:
-            print("Error: Command parameters do not match or is not allowed.")
+        elif command == '/register':
+            # Register a unique handle or alias
+            # Syntax: /register <handle>
+            try:
+                [handle] = params
+            except:
+                print("Error: Command parameters do not match or is not allowed.")
 
-    elif command == '/all':
-        # Send message to all
-        # Syntax: /all <message>
-        message = ' '.join(params)
+        elif command == '/all':
+            # Send message to all
+            # Syntax: /all <message>
+            message = ' '.join(params)
 
-    elif command == '/msg':
-        # Send direct message to a single handle
-        # Syntax: /msg <handle> <message>
-        try:
-            handle = params[0]
-            message = ' '.join(params[1:])
-        except:
-            print("Error: Command parameters do not match or is not allowed.")
+        elif command == '/msg':
+            # Send direct message to a single handle
+            # Syntax: /msg <handle> <message>
+            try:
+                handle = params[0]
+                message = ' '.join(params[1:])
+            except:
+                print("Error: Command parameters do not match or is not allowed.")
 
-    elif command == '/?':
-        # Request command help to output all Input, Syntax commands for references
-        pass
+        elif command == '/?':
+            # Request command help to output all Input, Syntax commands for references
+            pass
 
-    else:
-        print("Error: Command not found.")
+        else:
+            print("Error: Command not found.")
 
 
 if __name__ == "__main__":
