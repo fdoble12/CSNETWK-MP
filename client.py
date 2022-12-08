@@ -32,9 +32,14 @@ class Client:
 if __name__ == "__main__":
     client = Client()
 
+    print("***** Welcome to  Message Board System *****")
+    print("\ntype \"/?\" for the commands")
+
     while True:
+        
         user_input = input('\n>> ')
         command, *params = user_input.split()
+        
 
         if command == '/join':
             # Connect to the server application
@@ -99,7 +104,7 @@ if __name__ == "__main__":
 
                 try:
                     client.send({"command": "msg", "handle": handle, "message": message})
-                    print("[To" + handle + "]: " + message)
+                    print("[To " + handle + "]: " + message)
                 except:
                     print("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
 
@@ -109,12 +114,12 @@ if __name__ == "__main__":
 
         elif command == '/?':
             # Request command help to output all Input, Syntax commands for references
-            print("*************************** Commands for references ***************************")
+            print("\n*************************** Commands for references ***************************")
             print("/join <server_ip_add> <port>" + "\t\t" +       "Connect to the server application ")
             print("/leave"                       + "\t\t\t\t\t" + "Disconnect to the server application")
             print("/register <handle>"           + "\t\t\t" +     "Register a unique handle or alias")
             print("/all <message>"               + "\t\t\t\t" +   "Send message to all")
-            print("/msg <handle> <message>"      + "\t\t\t" +     "Send direct message to a single handle")
+            print("/msg <handle> <message>"      + "\t\t\t" +     "Send direct message to a single handle\n\n")
 
         else:
             print("Error: Command not found.")
