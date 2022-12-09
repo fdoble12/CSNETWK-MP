@@ -1,4 +1,5 @@
 import socket, json
+from multiprocessing import Process
 
 class Client:
     def __init__(self):
@@ -11,11 +12,15 @@ class Client:
         client_message = json.dumps(message)   # convert message to JSON
         self.socket.sendto(client_message.encode(), self.server_address_port)
 
-        #server_message, *_ = self.socket.recvfrom(1024)
-        #return server_message.decode()
-
     def server_message(self):
         return self.socket.recv(1024).decode('ascii')
+
+    def listen(self):
+        while True:
+            if self.socket:
+                encoded_message, *_ = client.socket.recvfrom(1024)
+                response = json.loads(encoded_message.decode('ascii'))
+                print(response['message'] + '\n')
 
     def connect(self, socket_address):
         # Connect to server
@@ -34,14 +39,14 @@ class Client:
 
 if __name__ == "__main__":
     client = Client()
+    proc = Process(target=client.listen)
 
     print("***** Welcome to  Message Board System *****")
     print("\ntype \"/?\" for the commands")
 
     try:
         while True:
-            
-            user_input = input('\n>> ')
+            user_input = input()
             command, *params = user_input.split()
             
 
@@ -54,10 +59,8 @@ if __name__ == "__main__":
                     try:
                         client.connect( (server_ip_add, int(port)) )
                         client.send({"command": "join"})
-                        response = json.loads(client.server_message())
-                        print(response['message']) #response from server
-                    except Exception as e:
-                        print(e)
+                        proc.start()
+                    except:
                         print("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
                 except:
                     print("Error: Command parameters do not match or is not allowed.")
@@ -67,8 +70,6 @@ if __name__ == "__main__":
                 # Disconnect to the server application
                 try:
                     client.send({"command": "leave"})
-                    response = json.loads(client.server_message())
-                    print(response['message'])
                     client.disconnect()
                 except:
                     print("Error: Disconnection failed. Please connect to the server first.")
@@ -82,7 +83,6 @@ if __name__ == "__main__":
 
                     try:
                         client.send({"command": "register", "handle": handle})
-                        print ("Welcome, " + handle + "!")
                     except:
                         print("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
                 except:
@@ -96,7 +96,6 @@ if __name__ == "__main__":
 
                 try:
                     client.send({"command": "all", "message": message})
-                    print("Sent to all: " + message)
                 except:
                     print("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
 
@@ -110,7 +109,6 @@ if __name__ == "__main__":
 
                     try:
                         client.send({"command": "msg", "handle": handle, "message": message})
-                        print("[To " + handle + "]: " + message)
                     except:
                         print("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
 
@@ -129,8 +127,10 @@ if __name__ == "__main__":
 
             else:
                 print("Error: Command not found.")
-    
+
     except KeyboardInterrupt:
         # Disconnect client before exiting program
         if client.socket != None:
+            client.send({"command": "leave"})
             client.disconnect()
+            proc.terminate()
