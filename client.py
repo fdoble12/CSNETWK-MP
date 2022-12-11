@@ -119,11 +119,11 @@ if __name__ == "__main__":
             elif command == '/?':
                 # Request command help to output all Input, Syntax commands for references
                 print("\n*************************** Commands for references ***************************")
-                print("/join <server_ip_add> <port>" + "\t\t" +       "Connect to the server application ")
-                print("/leave"                       + "\t\t\t\t\t" + "Disconnect to the server application")
-                print("/register <handle>"           + "\t\t\t" +     "Register a unique handle or alias")
-                print("/all <message>"               + "\t\t\t\t" +   "Send message to all")
-                print("/msg <handle> <message>"      + "\t\t\t" +     "Send direct message to a single handle\n\n")
+                print("\t/join <server_ip_add> <port>")
+                print("\t/leave")
+                print("\t/register <handle>")
+                print("\t/all <message>")
+                print("\t/msg <handle> <message>")
 
             else:
                 print("Error: Command not found.")

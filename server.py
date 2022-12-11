@@ -69,7 +69,7 @@ class Server:
                     for address in self.active_addresses:
                         self.send_response(f"{client_handle}: {message}", address)
                 else:
-                    self.send_response("Error: ", client_address)  # TODO: Add error message for unregistered users.
+                    self.send_response("Error: Handle or alias not found ", client_address)
 
 
             elif command == 'msg':
@@ -85,9 +85,9 @@ class Server:
                         self.send_response(f'[To {receiver_handle}]: {message}', sender_address)
                         self.send_response(f'[From {sender_handle}]: {message}', receiver_address)
                     else:
-                        self.send_response("Error: Handle or alias not found.", sender_address)
+                        self.send_response("Error: Handle or alias not found", sender_address)
                 else:
-                    self.send_response("Error: ", client_address)  # TODO: Add error message for unregistered users.
+                    self.send_response("Error: Handle or alias not found ", client_address)  
 
 
 if __name__ == "__main__":
