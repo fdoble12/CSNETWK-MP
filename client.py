@@ -18,7 +18,7 @@ class Client:
     def listen(self):
         while True:
             if self.socket:
-                encoded_message, *_ = client.socket.recvfrom(1024)
+                encoded_message, *_ = self.socket.recvfrom(1024)
                 response = json.loads(encoded_message.decode('ascii'))
                 print(response['message'] + '\n')
 
