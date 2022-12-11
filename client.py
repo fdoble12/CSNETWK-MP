@@ -1,16 +1,23 @@
 import socket, json
 from multiprocessing import Process
+from tkinter import *
+
 
 class Client:
-    def __init__(self):
+    def __init__(self, master):
         self.handle = None
         self.socket = None
         self.server_address_port = None
+        
+        self.root = master
+        self.create_gui()
+
     
     def send(self, message):
         # Send message to server
         client_message = json.dumps(message)   # convert message to JSON
         self.socket.sendto(client_message.encode(), self.server_address_port)
+        
 
     def server_message(self):
         return self.socket.recv(1024).decode('ascii')
@@ -35,14 +42,44 @@ class Client:
         # Registers user's handle. Assumes the handle is unique. Check with server first before calling this function.
         self.handle = handle
 
+    #GUI PART
+    def create_gui(self):
+        self.root.title("Message Board System") 
+        self.root.geometry('400x500')
 
+        #header
+        head_label = Label(root, bg="white", text=" Welcome to Message Board System ",  font=("Arial", 13), pady=10)
+        head_label.place(relwidth=1)
+
+        #create chat window
+        chatwindow = Text(root, bg= "beige", width= 50, height= 8)
+        chatwindow.place(x= 15, y= 50, height= 330, width= 370)
+
+        #create message area
+        messageWindow = Text(root, bd= 3, bg= "beige", width= 30, height= 4)
+        messageWindow.place (x= 15, y= 400, height= 88, width= 260)
+
+        #button for sending
+        button = Button(root, text = "Enter", bg= "white", activebackground = "light blue", font=("Arial", 13), width = 5, height = 5)
+        button.place(x= 285, y= 400, height= 88, width= 100)
+
+        #scroll bar
+        scroll = Scrollbar(root, command=chatwindow.yview())
+        scroll.place(x= 375, y=50, height= 330)
+
+        # self.win.protocol("WM_DELETE_WINDOW", self.stop)
+
+    
 
 if __name__ == "__main__":
-    client = Client()
+    root = Tk()
+    client = Client(root)
     proc = Process(target=client.listen)
 
     print("***** Welcome to  Message Board System *****")
     print("\ntype \"/?\" for the commands")
+
+    root.send
 
     try:
         while True:
