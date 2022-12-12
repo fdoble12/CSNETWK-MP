@@ -1,4 +1,4 @@
-import socket, json
+import socket, json, time
 from multiprocessing import Process
 from tkinter import *
 from threading import *
@@ -12,7 +12,8 @@ class Client:
 
         # thread for server responses
         self.t = Thread(target=self.listen)
-        self.activeThread = False
+        self.is_active_thread = False
+        self.connected = False
         
         # GUI
         self.root = master
@@ -30,29 +31,43 @@ class Client:
         return self.socket.recv(1024).decode('ascii')
 
     def listen(self):
-        while True:
-            encoded_message, *_ = self.socket.recvfrom(1024)
-            response = json.loads(encoded_message.decode('ascii'))
+        try:
+            while self.is_active_thread:
+                encoded_message, *_ = self.socket.recvfrom(1024)
+                response = json.loads(encoded_message.decode('ascii'))
 
-            if "prefix" in response and "type" in response:
-                if response["type"] == "RECEIVED_MESSAGE":
-                    self.gui_print(text=response['prefix'], style="receiver", linebreak=False)
+                if "prefix" in response and "type" in response:
+                    if response["type"] == "CONFIRM_CONNECTION":
+                        self.connected = True
 
                 elif response["type"] == "SENT_MESSAGE":
                     self.gui_print(text=response['prefix'], style="sender", linebreak=False)
 
-                elif response["type"] == "BROADCAST_MESSAGE":
-                    self.gui_print(text=response['prefix'], style="broadcast", linebreak=False)
+                    elif response["type"] == "RECEIVED_MESSAGE":
+                        self.gui_print(text=response['prefix'], style="receiver", linebreak=False)
 
-            self.gui_print(response['message'])
+                    elif response["type"] == "SENT_MESSAGE":
+                        self.gui_print(text=response['prefix'], style="sender", linebreak=False)
+
+                    elif response["type"] == "BROADCAST_MESSAGE":
+                        self.gui_print(text=response['prefix'], style="broadcast", linebreak=False)
+
+                self.gui_print(response['message'])
+        except:
+            pass
 
     def connect(self, socket_address):
         # Connect to server
         self.server_address_port = socket_address
         self.socket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
 
+        self.is_active_thread = True
+        self.t.start()
+
     def disconnect(self):
         # Disconnect from server
+        self.connected = False
+        self.is_active_thread = False
         self.socket.close()
 
     def register(self, handle):
@@ -119,15 +134,17 @@ class Client:
                 try:
                     server_ip_add, port = params
                     
-                    try:
-                        self.connect( (server_ip_add, int(port)) )
-                        self.send({"command": "join"})
+                    if not self.connected:
+                        try:
+                            self.connect( (server_ip_add, int(port)) )
+                            self.send({"command": "join"})
 
-                        if not self.activeThread:
-                            self.t.start()
-                            self.activeThread = True
-                    except:
-                        self.show_error("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
+                            time.sleep(2)
+                            if not self.connected:
+                                raise Exception()
+
+                        except:
+                            self.show_error("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
                 except:
                     self.show_error("Error: Command parameters do not match or is not allowed.")
 

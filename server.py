@@ -52,7 +52,12 @@ class Server:
             command = payload['command']
 
             if command == 'join':
-                self.send_response("Connection to Message Board Server is successful!", client_address)
+                confirmation_response = {
+                    "message": "Connection to Message Board Server is successful!",
+                    "type": "CONFIRM_CONNECTION",
+                    "prefix": ""
+                }
+                self.send_response(confirmation_response, client_address)
 
 
             elif command == 'leave':
