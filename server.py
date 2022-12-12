@@ -52,12 +52,30 @@ class Server:
             command = payload['command']
 
             if command == 'join':
-                self.send_response("Connection to Message Board Server is successful!", client_address)
+<<<<<<< HEAD
+                connect_response = {
+                    "type": "CONFIRM_CONNECTION",
+                    "message": "Connection to Message Board Server is successful!"
+                }
+                self.send_response(connect_response, client_address)
+=======
+                confirmation_response = {
+                    "message": "Connection to Message Board Server is successful!",
+                    "type": "CONFIRM_CONNECTION",
+                    "prefix": ""
+                }
+                self.send_response(confirmation_response, client_address)
+>>>>>>> 8ec6e77 (fix: no error msg on incorrect port)
 
 
             elif command == 'leave':
+                disconnect_response = {
+                    "message": "Connection closed. Thank you!",
+                    "type": "CLOSE_CONNECTION",
+                    "prefix": ""
+                }
+                self.send_response(disconnect_response, client_address)
                 self.directory.remove_client(address=client_address)
-                self.send_response("Connection closed. Thank you!", client_address)
 
 
             elif command == 'register':
