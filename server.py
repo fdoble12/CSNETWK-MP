@@ -61,8 +61,13 @@ class Server:
 
 
             elif command == 'leave':
+                disconnect_response = {
+                    "message": "Connection closed. Thank you!",
+                    "type": "CLOSE_CONNECTION",
+                    "prefix": ""
+                }
+                self.send_response(disconnect_response, client_address)
                 self.directory.remove_client(address=client_address)
-                self.send_response("Connection closed. Thank you!", client_address)
 
 
             elif command == 'register':

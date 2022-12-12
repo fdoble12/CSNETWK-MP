@@ -40,8 +40,8 @@ class Client:
                     if response["type"] == "CONFIRM_CONNECTION":
                         self.connected = True
 
-                elif response["type"] == "SENT_MESSAGE":
-                    self.gui_print(text=response['prefix'], style="sender", linebreak=False)
+                    elif response["type"] == "CLOSE_CONNECTION":
+                        self.connected = False
 
                     elif response["type"] == "RECEIVED_MESSAGE":
                         self.gui_print(text=response['prefix'], style="receiver", linebreak=False)
@@ -151,10 +151,13 @@ class Client:
 
             elif command == '/leave':
                 # Disconnect to the server application
-                try:
+                if self.connected:
                     self.send({"command": "leave"})
-                    self.disconnect()
-                except:
+
+                    time.sleep(2)
+                    if not self.connected:
+                        self.disconnect()
+                else:
                     self.show_error("Error: Disconnection failed. Please connect to the server first.")
 
 
