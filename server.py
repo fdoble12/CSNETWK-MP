@@ -32,6 +32,12 @@ class Server:
             server_message = json.dumps( response ).encode('ascii')
         self.socket.sendto(server_message, client_address)
 
+    def send_error(self, errorMsg, client_address):
+        error_response = {
+            "message": errorMsg,
+            "type": "ERROR"
+        }
+        self.send_response(error_response, client_address)
 
     def start(self):
         print(f"Server listening to {self.host} {self.port}...")
@@ -58,7 +64,7 @@ class Server:
                 handle = payload['handle']
 
                 if handle in self.active_users:
-                    self.send_response("Error: Registration failed. Handle or alias already exists.", client_address)
+                    self.send_error("Error: Registration failed. Handle or alias already exists.", client_address)
                 else:
                     self.directory.add_client(client_address, handle)
                     self.send_response(f"Welcome {handle}!", client_address)
@@ -78,7 +84,7 @@ class Server:
                         }
                         self.send_response(broadcast_response, address)
                 else:
-                    self.send_response("Error: Handle or alias not found ", client_address)
+                    self.send_error("Error: Handle or alias not found ", client_address)
 
 
             elif command == 'msg':
@@ -105,9 +111,9 @@ class Server:
                         }
                         self.send_response(receiver_response, receiver_address)
                     else:
-                        self.send_response("Error: Handle or alias not found", sender_address)
+                        self.send_error("Error: Handle or alias not found", sender_address)
                 else:
-                    self.send_response("Error: Handle or alias not found ", client_address)  
+                    self.send_error("Error: Handle or alias not found ", client_address)  
 
 
 if __name__ == "__main__":

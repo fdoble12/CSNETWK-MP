@@ -94,11 +94,15 @@ class Client:
         self.chatwindow.tag_config('sender', foreground="blue")
         self.chatwindow.tag_config('receiver', foreground="red")
         self.chatwindow.tag_config('broadcast', foreground="green")
+        self.chatwindow.tag_config('error', foreground="red")
 
         if style == '':
             self.chatwindow.insert(END, text + ('\n\n' if linebreak else ''))
         else:
             self.chatwindow.insert(END, text + ('\n\n' if linebreak else ''), style)
+
+    def show_error(self, errorMessage):
+        self.gui_print(text=errorMessage, style="error")
 
     def exec(self, evt=None):
         user_input = self.messageWindow.get("1.0",'end-1c')
@@ -123,9 +127,9 @@ class Client:
                             self.t.start()
                             self.activeThread = True
                     except:
-                        self.gui_print("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
+                        self.show_error("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
                 except:
-                    self.gui_print("Error: Command parameters do not match or is not allowed.")
+                    self.show_error("Error: Command parameters do not match or is not allowed.")
 
 
             elif command == '/leave':
@@ -134,7 +138,7 @@ class Client:
                     self.send({"command": "leave"})
                     self.disconnect()
                 except:
-                    self.gui_print("Error: Disconnection failed. Please connect to the server first.")
+                    self.show_error("Error: Disconnection failed. Please connect to the server first.")
 
 
             elif command == '/register':
@@ -146,9 +150,9 @@ class Client:
                     try:
                         self.send({"command": "register", "handle": handle})
                     except:
-                        self.gui_print("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
+                        self.show_error("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
                 except:
-                    self.gui_print("Error: Command parameters do not match or is not allowed.")
+                    self.show_error("Error: Command parameters do not match or is not allowed.")
 
 
             elif command == '/all':
@@ -159,7 +163,7 @@ class Client:
                 try:
                     self.send({"command": "all", "message": message})
                 except:
-                    self.gui_print("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
+                    self.show_error("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
 
 
             elif command == '/msg':
@@ -172,10 +176,10 @@ class Client:
                     try:
                         self.send({"command": "msg", "handle": handle, "message": message})
                     except:
-                        self.gui_print("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
+                        self.show_error("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
 
                 except:
-                    self.gui_print("Error: Command parameters do not match or is not allowed.")
+                    self.show_error("Error: Command parameters do not match or is not allowed.")
 
 
             elif command == '/?':
@@ -188,7 +192,7 @@ class Client:
                 "/msg <handle> <message>         Send direct message to a single handle\n""")
 
             else:
-                self.gui_print("Error: Command not found.")
+                self.show_error("Error: Command not found.")
 
 
 
