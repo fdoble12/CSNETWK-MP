@@ -44,11 +44,19 @@ if __name__ == "__main__":
     print("***** Welcome to  Message Board System *****")
     print("\ntype \"/?\" for the commands")
 
+<<<<<<< Updated upstream
     try:
         while True:
             user_input = input()
             command, *params = user_input.split()
             
+=======
+        if user_input.strip():  # check if input box is blank
+            command, *params = user_input.strip().split()
+
+            # reset input field
+            self.messageWindow.delete(1.0, END)
+>>>>>>> Stashed changes
 
             if command == '/join':
                 # Connect to the server application
