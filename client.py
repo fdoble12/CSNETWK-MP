@@ -37,12 +37,14 @@ class Client:
             if "prefix" in response and "type" in response:
                 if response["type"] == "RECEIVED_MESSAGE":
                     self.gui_print(text=response['prefix'], style="receiver", linebreak=False)
-                    self.gui_print(response['message'])
+
                 elif response["type"] == "SENT_MESSAGE":
                     self.gui_print(text=response['prefix'], style="sender", linebreak=False)
-                    self.gui_print(response['message'])
-            else:
-                self.gui_print(response['message'])
+
+                elif response["type"] == "BROADCAST_MESSAGE":
+                    self.gui_print(text=response['prefix'], style="broadcast", linebreak=False)
+
+            self.gui_print(response['message'])
 
     def connect(self, socket_address):
         # Connect to server
@@ -91,6 +93,7 @@ class Client:
         # existing styles
         self.chatwindow.tag_config('sender', foreground="blue")
         self.chatwindow.tag_config('receiver', foreground="red")
+        self.chatwindow.tag_config('broadcast', foreground="green")
 
         if style == '':
             self.chatwindow.insert(END, text + ('\n\n' if linebreak else ''))
@@ -201,4 +204,4 @@ if __name__ == "__main__":
         # Disconnect client before exiting program
         if client.socket != None:
             client.send({"command": "leave"})
-            client.t.disconnect()
+            client.disconnect()

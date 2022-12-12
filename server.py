@@ -71,7 +71,12 @@ class Server:
                     message = payload['message']
 
                     for address in self.active_addresses:
-                        self.send_response(f"{client_handle}: {message}", address)
+                        broadcast_response = {
+                            "message": message,
+                            "prefix": f'{client_handle}: ',
+                            "type": "BROADCAST_MESSAGE"
+                        }
+                        self.send_response(broadcast_response, address)
                 else:
                     self.send_response("Error: Handle or alias not found ", client_address)
 
