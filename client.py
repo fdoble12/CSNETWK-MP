@@ -1,4 +1,4 @@
-import socket, json
+import socket, json, time
 from multiprocessing import Process
 from tkinter import *
 from threading import *
@@ -9,6 +9,8 @@ class Client:
         self.handle = None
         self.socket = None
         self.server_address_port = None
+
+        self.is_connected = False
 
         # thread for server responses
         self.t = Thread(target=self.listen)
@@ -25,6 +27,7 @@ class Client:
         # Send message to server
         client_message = json.dumps(message)   # convert message to JSON
         self.socket.sendto(client_message.encode(), self.server_address_port)
+        
         
     def server_message(self):
         return self.socket.recv(1024).decode('ascii')
@@ -43,6 +46,9 @@ class Client:
 
                 elif response["type"] == "BROADCAST_MESSAGE":
                     self.gui_print(text=response['prefix'], style="broadcast", linebreak=False)
+            elif "type" in response:
+                if response["type"] == "CONFIRM_CONNECTION":
+                    self.is_connected = True
 
             self.gui_print(response['message'])
 
@@ -119,15 +125,21 @@ class Client:
                 try:
                     server_ip_add, port = params
                     
-                    try:
-                        self.connect( (server_ip_add, int(port)) )
-                        self.send({"command": "join"})
+                    if not self.is_connected:
+                        try:
+                            self.connect( (server_ip_add, int(port)) )
+                            self.send({"command": "join"})
 
-                        if not self.activeThread:
-                            self.t.start()
-                            self.activeThread = True
-                    except:
-                        self.show_error("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
+                            if not self.activeThread:
+                                self.t.start()
+                                self.activeThread = True
+
+                            # ping server, expect response within 3 seconds
+                            time.sleep(3)
+                            if not self.is_connected:
+                                raise Exception()
+                        except:
+                            self.show_error("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
                 except:
                     self.show_error("Error: Command parameters do not match or is not allowed.")
 
