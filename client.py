@@ -103,6 +103,7 @@ class Client:
         #create chat window
         self.chatwindow = Text(root, bg= "beige", width= 50, height= 8)
         self.chatwindow.place(x= 15, y= 50, height= 330, width= 370)
+        self.chatwindow.config(state=DISABLED)
 
         #create message area
         self.messageWindow = Text(root, bd= 3, bg= "beige", width= 30, height= 4)
@@ -128,10 +129,14 @@ class Client:
         self.chatwindow.tag_config('broadcast', foreground="green")
         self.chatwindow.tag_config('error', foreground="red")
 
+        self.chatwindow.config(state=NORMAL)    # allow editing
+
         if style == '':
             self.chatwindow.insert(END, text + ('\n\n' if linebreak else ''))
         else:
             self.chatwindow.insert(END, text + ('\n\n' if linebreak else ''), style)
+
+        self.chatwindow.config(state=DISABLED)  # set to read-only
         
         # auto scroll to bottom
         self.chatwindow.see(END)
@@ -163,8 +168,7 @@ class Client:
                             if not self.connected:
                                 raise Exception()
 
-                        except Exception as e:
-                            print(e)
+                        except:
                             self.show_error("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
                 except:
                     self.show_error("Error: Command parameters do not match or is not allowed.")
