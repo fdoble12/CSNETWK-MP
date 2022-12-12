@@ -108,7 +108,7 @@ class Client:
         user_input = self.messageWindow.get("1.0",'end-1c')
 
         if user_input.strip():  # check if input box is blank
-            command, *params = user_input.split()
+            command, *params = user_input.strip().split()
 
             # reset input field
             self.messageWindow.delete(1.0, END)
