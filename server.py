@@ -39,6 +39,16 @@ class Server:
         }
         self.send_response(error_response, client_address)
 
+    def close(self):
+        # Send message to connected clients before closing server
+        for address in self.active_addresses:
+            disconnect_response = {
+                "message": "Disconnected from server.",
+                "type": "CLOSE_CONNECTION",
+                "prefix": ""
+            }
+            self.send_response(disconnect_response, address)
+
     def start(self):
         print(f"Server listening to {self.host} {self.port}...")
        
@@ -140,4 +150,5 @@ if __name__ == "__main__":
         server = Server(HOST, PORT)
         server.start()
     except:
+        server.close()
         print('\nClosing server...')
