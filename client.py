@@ -57,7 +57,7 @@ class Client:
                 elif "type" in response:
                     if response["type"] == "ERROR":
                         self.gui_print(text=response['message'], style='error')
-                        
+
                 else:
                     self.gui_print(response['message'])
         except:
@@ -76,6 +76,7 @@ class Client:
         # Disconnect from server
         self.connected = False
         self.is_active_thread = False
+        #self.t.join()
         self.t = None
         
         self.socket.close()
@@ -165,15 +166,17 @@ class Client:
 
             elif command == '/leave':
                 # Disconnect to the server application
-                if self.connected:
-                    self.send({"command": "leave"})
+                if len(params) == 0:
+                    if self.connected:
+                        self.send({"command": "leave"})
 
-                    time.sleep(2)
-                    if not self.connected:
-                        self.disconnect()
+                        time.sleep(2)
+                        if not self.connected:
+                            self.disconnect()
+                    else:
+                        self.show_error("Error: Disconnection failed. Please connect to the server first.")
                 else:
-                    self.show_error("Error: Disconnection failed. Please connect to the server first.")
-
+                    self.show_error("Error: Command parameters do not match or is not allowed.")
 
             elif command == '/register':
                 # Register a unique handle or alias
