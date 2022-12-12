@@ -205,10 +205,13 @@ class Client:
                 # Syntax: /all <message>
                 message = ' '.join(params)
 
-                try:
-                    self.send({"command": "all", "message": message})
-                except:
-                    self.show_error("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
+                if len(message) > 0:
+                    try:
+                        self.send({"command": "all", "message": message})
+                    except:
+                        self.show_error("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
+                else:
+                    self.show_error("Error: Command parameters do not match or is not allowed.")
 
 
             elif command == '/msg':
@@ -218,11 +221,13 @@ class Client:
                     handle = params[0]
                     message = ' '.join(params[1:])
 
-                    try:
-                        self.send({"command": "msg", "handle": handle, "message": message})
-                    except:
-                        self.show_error("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
-
+                    if len(message) > 0:
+                        try:
+                            self.send({"command": "msg", "handle": handle, "message": message})
+                        except:
+                            self.show_error("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
+                    else:
+                        raise Exception()
                 except:
                     self.show_error("Error: Command parameters do not match or is not allowed.")
 
