@@ -9,6 +9,7 @@ class Client:
         self.handle = None
         self.socket = None
         self.server_address_port = None
+        self.handle = None
 
         # thread for server responses
         self.t = None
@@ -43,6 +44,9 @@ class Client:
                     elif response["type"] == "CLOSE_CONNECTION":
                         self.connected = False
 
+                    elif response["type"] == "CONFIRM_HANDLE":
+                        self.register(response['prefix'])
+
                     elif response["type"] == "RECEIVED_MESSAGE":
                         self.gui_print(text=response['prefix'], style="receiver", linebreak=False)
 
@@ -57,6 +61,7 @@ class Client:
                 elif "type" in response:
                     if response["type"] == "ERROR":
                         self.gui_print(text=response['message'], style='error')
+                        
 
                 else:
                     self.gui_print(response['message'])
@@ -184,10 +189,13 @@ class Client:
                 try:
                     [handle] = params
 
-                    try:
-                        self.send({"command": "register", "handle": handle})
-                    except:
-                        self.show_error("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
+                    if self.handle == None:
+                        try:
+                            self.send({"command": "register", "handle": handle})
+                        except:
+                            self.show_error("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
+                    else:
+                        self.show_error("Error: You have already registered.")
                 except:
                     self.show_error("Error: Command parameters do not match or is not allowed.")
 

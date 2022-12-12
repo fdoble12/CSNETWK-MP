@@ -77,7 +77,13 @@ class Server:
                     self.send_error("Error: Registration failed. Handle or alias already exists.", client_address)
                 else:
                     self.directory.add_client(client_address, handle)
-                    self.send_response(f"Welcome {handle}!", client_address)
+
+                    welcome_response = {
+                        "message": f"Welcome {handle}!",
+                        "type": "CONFIRM_HANDLE",
+                        "prefix": handle
+                    }
+                    self.send_response(welcome_response, client_address)
 
 
             elif command == 'all':
