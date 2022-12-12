@@ -9,12 +9,12 @@ class Client:
         self.handle = None
         self.socket = None
         self.server_address_port = None
-
-        self.is_connected = False
+        self.handle = None
 
         # thread for server responses
-        self.t = Thread(target=self.listen)
-        self.activeThread = False
+        self.t = None
+        self.is_active_thread = False
+        self.connected = False
         
         # GUI
         self.root = master
@@ -28,37 +28,63 @@ class Client:
         client_message = json.dumps(message)   # convert message to JSON
         self.socket.sendto(client_message.encode(), self.server_address_port)
         
-        
     def server_message(self):
         return self.socket.recv(1024).decode('ascii')
 
     def listen(self):
-        while True:
-            encoded_message, *_ = self.socket.recvfrom(1024)
-            response = json.loads(encoded_message.decode('ascii'))
+        try:
+            while self.is_active_thread:
+                encoded_message, *_ = self.socket.recvfrom(1024)
+                response = json.loads(encoded_message.decode('ascii'))
 
-            if "prefix" in response and "type" in response:
-                if response["type"] == "RECEIVED_MESSAGE":
-                    self.gui_print(text=response['prefix'], style="receiver", linebreak=False)
+                if "prefix" in response and "type" in response:
+                    if response["type"] == "CONFIRM_CONNECTION":
+                        self.connected = True
 
-                elif response["type"] == "SENT_MESSAGE":
-                    self.gui_print(text=response['prefix'], style="sender", linebreak=False)
+                    elif response["type"] == "CLOSE_CONNECTION":
+                        self.connected = False
 
-                elif response["type"] == "BROADCAST_MESSAGE":
-                    self.gui_print(text=response['prefix'], style="broadcast", linebreak=False)
-            elif "type" in response:
-                if response["type"] == "CONFIRM_CONNECTION":
-                    self.is_connected = True
+                    elif response["type"] == "CONFIRM_HANDLE":
+                        self.register(response['prefix'])
 
-            self.gui_print(response['message'])
+                    elif response["type"] == "RECEIVED_MESSAGE":
+                        self.gui_print(text=response['prefix'], style="receiver", linebreak=False)
+
+                    elif response["type"] == "SENT_MESSAGE":
+                        self.gui_print(text=response['prefix'], style="sender", linebreak=False)
+
+                    elif response["type"] == "BROADCAST_MESSAGE":
+                        self.gui_print(text=response['prefix'], style="broadcast", linebreak=False)
+                
+                    self.gui_print(response['message'])
+
+                elif "type" in response:
+                    if response["type"] == "ERROR":
+                        self.gui_print(text=response['message'], style='error')
+                        
+
+                else:
+                    self.gui_print(response['message'])
+        except:
+            pass
 
     def connect(self, socket_address):
         # Connect to server
         self.server_address_port = socket_address
         self.socket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
 
+        self.is_active_thread = True
+        self.t = Thread(target=self.listen)
+        self.t.start()
+
     def disconnect(self):
         # Disconnect from server
+        self.handle = None
+
+        self.connected = False
+        self.is_active_thread = False
+        self.t = None
+        
         self.socket.close()
 
     def register(self, handle):
@@ -77,6 +103,7 @@ class Client:
         #create chat window
         self.chatwindow = Text(root, bg= "beige", width= 50, height= 8)
         self.chatwindow.place(x= 15, y= 50, height= 330, width= 370)
+        self.chatwindow.config(state=DISABLED)
 
         #create message area
         self.messageWindow = Text(root, bd= 3, bg= "beige", width= 30, height= 4)
@@ -102,10 +129,17 @@ class Client:
         self.chatwindow.tag_config('broadcast', foreground="green")
         self.chatwindow.tag_config('error', foreground="red")
 
+        self.chatwindow.config(state=NORMAL)    # allow editing
+
         if style == '':
             self.chatwindow.insert(END, text + ('\n\n' if linebreak else ''))
         else:
             self.chatwindow.insert(END, text + ('\n\n' if linebreak else ''), style)
+
+        self.chatwindow.config(state=DISABLED)  # set to read-only
+        
+        # auto scroll to bottom
+        self.chatwindow.see(END)
 
     def show_error(self, errorMessage):
         self.gui_print(text=errorMessage, style="error")
@@ -114,7 +148,7 @@ class Client:
         user_input = self.messageWindow.get("1.0",'end-1c')
 
         if user_input.strip():  # check if input box is blank
-            command, *params = user_input.strip().split()
+            command, *params = user_input.split()
 
             # reset input field
             self.messageWindow.delete(1.0, END)
@@ -125,19 +159,15 @@ class Client:
                 try:
                     server_ip_add, port = params
                     
-                    if not self.is_connected:
+                    if not self.connected:
                         try:
                             self.connect( (server_ip_add, int(port)) )
                             self.send({"command": "join"})
 
-                            if not self.activeThread:
-                                self.t.start()
-                                self.activeThread = True
-
-                            # ping server, expect response within 3 seconds
-                            time.sleep(3)
-                            if not self.is_connected:
+                            time.sleep(2)
+                            if not self.connected:
                                 raise Exception()
+
                         except:
                             self.show_error("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
                 except:
@@ -146,12 +176,17 @@ class Client:
 
             elif command == '/leave':
                 # Disconnect to the server application
-                try:
-                    self.send({"command": "leave"})
-                    self.disconnect()
-                except:
-                    self.show_error("Error: Disconnection failed. Please connect to the server first.")
+                if len(params) == 0:
+                    if self.connected:
+                        self.send({"command": "leave"})
 
+                        time.sleep(2)
+                        if not self.connected:
+                            self.disconnect()
+                    else:
+                        self.show_error("Error: Disconnection failed. Please connect to the server first.")
+                else:
+                    self.show_error("Error: Command parameters do not match or is not allowed.")
 
             elif command == '/register':
                 # Register a unique handle or alias
@@ -159,10 +194,13 @@ class Client:
                 try:
                     [handle] = params
 
-                    try:
-                        self.send({"command": "register", "handle": handle})
-                    except:
-                        self.show_error("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
+                    if self.handle == None:
+                        try:
+                            self.send({"command": "register", "handle": handle})
+                        except:
+                            self.show_error("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
+                    else:
+                        self.show_error("Error: You have already registered.")
                 except:
                     self.show_error("Error: Command parameters do not match or is not allowed.")
 
@@ -172,10 +210,13 @@ class Client:
                 # Syntax: /all <message>
                 message = ' '.join(params)
 
-                try:
-                    self.send({"command": "all", "message": message})
-                except:
-                    self.show_error("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
+                if len(message) > 0:
+                    try:
+                        self.send({"command": "all", "message": message})
+                    except:
+                        self.show_error("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
+                else:
+                    self.show_error("Error: Command parameters do not match or is not allowed.")
 
 
             elif command == '/msg':
@@ -185,11 +226,13 @@ class Client:
                     handle = params[0]
                     message = ' '.join(params[1:])
 
-                    try:
-                        self.send({"command": "msg", "handle": handle, "message": message})
-                    except:
-                        self.show_error("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
-
+                    if len(message) > 0:
+                        try:
+                            self.send({"command": "msg", "handle": handle, "message": message})
+                        except:
+                            self.show_error("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
+                    else:
+                        raise Exception()
                 except:
                     self.show_error("Error: Command parameters do not match or is not allowed.")
 

@@ -39,16 +39,6 @@ class Server:
         }
         self.send_response(error_response, client_address)
 
-    def close(self):
-        # Send message to connected clients before closing server
-        for address in self.active_addresses:
-            disconnect_response = {
-                "message": "Disconnected from server.",
-                "type": "CLOSE_CONNECTION",
-                "prefix": ""
-            }
-            self.send_response(disconnect_response, address)
-
     def start(self):
         print(f"Server listening to {self.host} {self.port}...")
        
@@ -62,16 +52,22 @@ class Server:
             command = payload['command']
 
             if command == 'join':
-                connect_response = {
+                confirmation_response = {
+                    "message": "Connection to Message Board Server is successful!",
                     "type": "CONFIRM_CONNECTION",
-                    "message": "Connection to Message Board Server is successful!"
+                    "prefix": ""
                 }
-                self.send_response(connect_response, client_address)
+                self.send_response(confirmation_response, client_address)
 
 
             elif command == 'leave':
+                disconnect_response = {
+                    "message": "Connection closed. Thank you!",
+                    "type": "CLOSE_CONNECTION",
+                    "prefix": ""
+                }
+                self.send_response(disconnect_response, client_address)
                 self.directory.remove_client(address=client_address)
-                self.send_response("Connection closed. Thank you!", client_address)
 
 
             elif command == 'register':
@@ -81,7 +77,13 @@ class Server:
                     self.send_error("Error: Registration failed. Handle or alias already exists.", client_address)
                 else:
                     self.directory.add_client(client_address, handle)
-                    self.send_response(f"Welcome {handle}!", client_address)
+
+                    welcome_response = {
+                        "message": f"Welcome {handle}!",
+                        "type": "CONFIRM_HANDLE",
+                        "prefix": handle
+                    }
+                    self.send_response(welcome_response, client_address)
 
 
             elif command == 'all':
@@ -138,5 +140,4 @@ if __name__ == "__main__":
         server = Server(HOST, PORT)
         server.start()
     except:
-        server.close()
         print('\nClosing server...')
