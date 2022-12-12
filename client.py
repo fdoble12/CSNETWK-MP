@@ -11,7 +11,7 @@ class Client:
         self.server_address_port = None
 
         # thread for server responses
-        self.t = Thread(target=self.listen)
+        self.t = None
         self.is_active_thread = False
         self.connected = False
         
@@ -62,12 +62,15 @@ class Client:
         self.socket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
 
         self.is_active_thread = True
+        self.t = Thread(target=self.listen)
         self.t.start()
 
     def disconnect(self):
         # Disconnect from server
         self.connected = False
         self.is_active_thread = False
+        self.t = None
+        
         self.socket.close()
 
     def register(self, handle):
@@ -146,7 +149,8 @@ class Client:
                             if not self.connected:
                                 raise Exception()
 
-                        except:
+                        except Exception as e:
+                            print(e)
                             self.show_error("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
                 except:
                     self.show_error("Error: Command parameters do not match or is not allowed.")
