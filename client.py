@@ -115,6 +115,9 @@ class Client:
             self.chatwindow.insert(END, text + ('\n\n' if linebreak else ''))
         else:
             self.chatwindow.insert(END, text + ('\n\n' if linebreak else ''), style)
+        
+        # auto scroll to bottom
+        self.chatwindow.see(END)
 
     def show_error(self, errorMessage):
         self.gui_print(text=errorMessage, style="error")
