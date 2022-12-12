@@ -196,12 +196,12 @@ class Client:
 
             elif command == '/?':
                 # Request command help to output all Input, Syntax commands for references
-                self.gui_print("************* Commands for references *************\n" + \
-                "/join <server_ip_add> <port>    Connect to the server application\n" + \
-                "/leave                          Disconnect to the server application\n" + \
-                "/register <handle>              Register a unique handle or alias\n" + \
-                "/all <message>                  Send message to all\n" + \
-                "/msg <handle> <message>         Send direct message to a single handle\n""")
+                self.gui_print("******** Commands for references ********\n" + \
+                "\t /join <server_ip_add> <port>\n" + \
+                "\t /leave \n" + \
+                "\t /register <handle> \n" + \
+                "\t /all <message> \n" + \
+                "\t /msg <handle> <message> """)
 
             else:
                 self.show_error("Error: Command not found.")
