@@ -168,7 +168,8 @@ class Client:
                             if not self.connected:
                                 raise Exception()
 
-                        except:
+                        except Exception as e:
+                            print(e)
                             self.show_error("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
                 except:
                     self.show_error("Error: Command parameters do not match or is not allowed.")
