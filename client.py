@@ -171,7 +171,8 @@ class Client:
                         except Exception as e:
                             print(e)
                             self.show_error("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
-                except:
+                except Exception as e:
+                    print(e)
                     self.show_error("Error: Command parameters do not match or is not allowed.")
 
 
@@ -198,7 +199,8 @@ class Client:
                     if self.handle == None:
                         try:
                             self.send({"command": "register", "handle": handle})
-                        except:
+                        except Exception as e:
+                            print(e)
                             self.show_error("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
                     else:
                         self.show_error("Error: You have already registered.")
@@ -214,7 +216,8 @@ class Client:
                 if len(message) > 0:
                     try:
                         self.send({"command": "all", "message": message})
-                    except:
+                    except Exception as e:
+                        print(e)
                         self.show_error("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
                 else:
                     self.show_error("Error: Command parameters do not match or is not allowed.")
@@ -230,7 +233,8 @@ class Client:
                     if len(message) > 0:
                         try:
                             self.send({"command": "msg", "handle": handle, "message": message})
-                        except:
+                        except Exception as e:
+                            print(e)
                             self.show_error("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
                     else:
                         raise Exception()
