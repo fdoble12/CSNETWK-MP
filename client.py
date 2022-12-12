@@ -79,9 +79,10 @@ class Client:
 
     def disconnect(self):
         # Disconnect from server
+        self.handle = None
+
         self.connected = False
         self.is_active_thread = False
-        #self.t.join()
         self.t = None
         
         self.socket.close()
