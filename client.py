@@ -51,8 +51,15 @@ class Client:
 
                     elif response["type"] == "BROADCAST_MESSAGE":
                         self.gui_print(text=response['prefix'], style="broadcast", linebreak=False)
+                
+                    self.gui_print(response['message'])
 
-                self.gui_print(response['message'])
+                elif "type" in response:
+                    if response["type"] == "ERROR":
+                        self.gui_print(text=response['message'], style='error')
+                        
+                else:
+                    self.gui_print(response['message'])
         except:
             pass
 
