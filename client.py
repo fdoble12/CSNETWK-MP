@@ -33,7 +33,16 @@ class Client:
         while True:
             encoded_message, *_ = self.socket.recvfrom(1024)
             response = json.loads(encoded_message.decode('ascii'))
-            self.gui_print(response['message'])
+
+            if "prefix" in response and "type" in response:
+                if response["type"] == "RECEIVED_MESSAGE":
+                    self.gui_print(text=response['prefix'], style="receiver", linebreak=False)
+                    self.gui_print(response['message'])
+                elif response["type"] == "SENT_MESSAGE":
+                    self.gui_print(text=response['prefix'], style="sender", linebreak=False)
+                    self.gui_print(response['message'])
+            else:
+                self.gui_print(response['message'])
 
     def connect(self, socket_address):
         # Connect to server
@@ -78,8 +87,15 @@ class Client:
 
         # self.win.protocol("WM_DELETE_WINDOW", self.stop)
 
-    def gui_print(self, text):
-        self.chatwindow.insert(END, text + '\n\n')
+    def gui_print(self, text='', style='', linebreak=True):
+        # existing styles
+        self.chatwindow.tag_config('sender', foreground="blue")
+        self.chatwindow.tag_config('receiver', foreground="red")
+
+        if style == '':
+            self.chatwindow.insert(END, text + ('\n\n' if linebreak else ''))
+        else:
+            self.chatwindow.insert(END, text + ('\n\n' if linebreak else ''), style)
 
     def exec(self, evt=None):
         user_input = self.messageWindow.get("1.0",'end-1c')

@@ -25,7 +25,11 @@ class Server:
 
     def send_response(self, response, client_address):
         # Send message to client (JSON)
-        server_message = json.dumps( {"message": response} ).encode('ascii')
+        server_message = ""
+        if isinstance(response, str):
+            server_message = json.dumps( {"message": response} ).encode('ascii')
+        elif isinstance(response, object):
+            server_message = json.dumps( response ).encode('ascii')
         self.socket.sendto(server_message, client_address)
 
 
@@ -82,8 +86,19 @@ class Server:
                     message             = payload['message']
 
                     if receiver_handle in self.active_users:
-                        self.send_response(f'[To {receiver_handle}]: {message}', sender_address)
-                        self.send_response(f'[From {sender_handle}]: {message}', receiver_address)
+                        sender_response = {
+                            "message": message,
+                            "prefix": f'[To {receiver_handle}]: ',
+                            "type": "SENT_MESSAGE"
+                        }
+                        self.send_response(sender_response, sender_address)
+
+                        receiver_response = {
+                            "message": message,
+                            "prefix": f'[From {sender_handle}]: ',
+                            "type": "RECEIVED_MESSAGE"
+                        }
+                        self.send_response(receiver_response, receiver_address)
                     else:
                         self.send_response("Error: Handle or alias not found", sender_address)
                 else:
